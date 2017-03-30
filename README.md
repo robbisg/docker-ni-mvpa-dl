@@ -2,7 +2,7 @@
 Dockerfile for deep learning, neuroimaging and mvpa.
 
 This docker installs tensorflow and keras to be used with the GPU, so be sure to have your driver installed and install also nvidia-docker.
-Other neuroimaging software installed are AFNI, FSL using NeuroDebian repo, moreover python nipy packages (nipy, nilearn, sklearn, nitime, mne and pymvpa) are installed.
+Other neuroimaging software installed is AFNI and FSL using NeuroDebian repo, moreover python nipy packages (nipy, nilearn, sklearn, nitime, mne and pymvpa) are installed.
 
 To build the image:
 ```bash
