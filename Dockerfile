@@ -89,6 +89,24 @@ RUN pip --no-cache-dir install git+git://github.com/PyMVPA/PyMVPA.git
 ARG KERAS_VERSION=1.2.0
 RUN pip --no-cache-dir install git+git://github.com/fchollet/keras.git@${KERAS_VERSION}
 
+USER root
+
+RUN wget ftp://imaging.wustl.edu/pub/raichlab/4dfp_tools/4dfp_scripts.tar
+RUN wget ftp://imaging.wustl.edu/pub/raichlab/4dfp_tools/nil-tools.tar
+
+ENV NILSRC=/usr/lib/4dfp/src
+ENV RELEASE=/usr/lib/4dfp/release
+
+RUN mkdir NILSRC
+RUN mkdir RELEASE
+
+RUN tar -xvf nil-tools.tar -C NILSRC
+RUN cd NILSRC
+RUN sh make_nil-tools.csh
+
+RUN mv 4dfp_scripts.tar RELEASE
+RUN cd RELEASE
+RUN tar -xvf 4dfp_scripts.tar
 
 #----------------------------------------
 # Clear apt cache and other empty folders
