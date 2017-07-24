@@ -8,6 +8,7 @@
 FROM nvidia/cuda:8.0-cudnn5-devel-ubuntu16.04
 FROM tensorflow/tensorflow:latest-gpu
 
+
 # Based on floydhub/deep-learning docker and Michael Notter ni docker
 MAINTAINER Roberto Guidotti <rob.guidotti@gmail.com>
 
@@ -46,7 +47,8 @@ RUN apt-get update && apt-get install -yq --no-install-recommends bzip2 \
                                                 unzip \
                                                 wget \
                                                 xvfb \
-																								swig \
+						swig \
+						apt-transport-https \
                                                 zip
 
 ENV NEURODEBIAN_URL http://neuro.debian.net/lists/xenial.de-m.full
@@ -73,6 +75,13 @@ ENV FSLDIR=/usr/share/fsl/5.0 \
     AFNI_TTATLAS_DATASET=/usr/share/afni/atlases \
     AFNI_PLUGINPATH=/usr/lib/afni/plugins \
     PATH=/usr/lib/fsl/5.0:/usr/lib/afni/bin:$PATH
+
+RUN echo ". /etc/fsl/5.0/fsl.sh" >> /root/.bashrc
+
+## INSTALL R
+RUN add-apt-repository 'deb [arch=amd64,i386] https://cran.rstudio.com/bin/linux/ubuntu xenial/'
+RUN apt-get update && apt-get install -yq --allow-unauthenticated r-base r-base-dev
+
 
 
 RUN apt-get install -yq --no-install-recommends graphviz
