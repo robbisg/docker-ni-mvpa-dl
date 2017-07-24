@@ -49,13 +49,35 @@ RUN apt-get update && apt-get install -yq --no-install-recommends bzip2 \
                                                 xvfb \
 						swig \
 						apt-transport-https \
-                                                zip
+                                                tcsh
+
+RUN apt-get install -yq --no-install-recommends build-essential gfortran
 
 ENV NEURODEBIAN_URL http://neuro.debian.net/lists/xenial.de-m.full
 RUN curl -sSL $NEURODEBIAN_URL | tee /etc/apt/sources.list.d/neurodebian.sources.list && \
-    apt-key adv --recv-keys --keyserver hkp://pgp.mit.edu:80 0xA5D32F012649A5A9 && \
+    apt-key adv --recv-keys --keyserver hkp://pool.sks-keyservers.net:80 0xA5D32F012649A5A9 && \
     apt-get update -qq
 
+
+USER root
+
+#-------------- 4dfp suite
+RUN wget ftp://imaging.wustl.edu/pub/raichlab/4dfp_tools/4dfp_scripts.tar
+
+ENV NILSRC=/usr/lib/4dfp/src
+ENV RELEASE=/usr/lib/4dfp/release
+
+RUN mkdir -p $NILSRC
+RUN mkdir -p $RELEASE
+
+RUN git clone https://github.com/robbisg/4dfp_tools.git $NILSRC
+RUN groupadd program
+RUN cd $NILSRC && tcsh $NILSRC/make_nil-tools.csh
+
+RUN mv 4dfp_scripts.tar $RELEASE
+RUN cd $RELEASE && tar -xvf 4dfp_scripts.tar -C $RELEASE
+
+ENV PATH=$RELEASE:$PATH
 
 #---------------------
 # Install FSL and AFNI
@@ -97,6 +119,7 @@ RUN pip --no-cache-dir install git+git://github.com/PyMVPA/PyMVPA.git
 
 ARG KERAS_VERSION=1.2.0
 RUN pip --no-cache-dir install git+git://github.com/fchollet/keras.git@${KERAS_VERSION}
+
 
 
 #----------------------------------------
