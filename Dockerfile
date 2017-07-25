@@ -80,11 +80,11 @@ RUN cd $RELEASE && tar -xvf 4dfp_scripts.tar -C $RELEASE
 ENV PATH=$RELEASE:$PATH
 
 #---------------------
-# Install FSL and AFNI
+# Install FSL
 #---------------------
 
 RUN apt-get update && \
-    apt-get install -y -qq --no-install-recommends fsl-core fsl-atlases afni
+    apt-get install -y -qq --no-install-recommends fsl-core fsl-atlases
 ENV FSLDIR=/usr/share/fsl/5.0 \
     FSLOUTPUTTYPE=NIFTI_GZ \
     FSLMULTIFILEQUIT=TRUE \
@@ -92,19 +92,35 @@ ENV FSLDIR=/usr/share/fsl/5.0 \
     LD_LIBRARY_PATH=/usr/lib/fsl/5.0:$LD_LIBRARY_PATH \
     FSLTCLSH=/usr/bin/tclsh \
     FSLWISH=/usr/bin/wish \
-    AFNI_MODELPATH=/usr/lib/afni/models \
-    AFNI_IMSAVE_WARNINGS=NO \
-    AFNI_TTATLAS_DATASET=/usr/share/afni/atlases \
-    AFNI_PLUGINPATH=/usr/lib/afni/plugins \
-    PATH=/usr/lib/fsl/5.0:/usr/lib/afni/bin:$PATH
+    PATH=/usr/lib/fsl/5.0:$PATH
 
 RUN echo ". /etc/fsl/5.0/fsl.sh" >> /root/.bashrc
 
-## INSTALL R
-RUN add-apt-repository 'deb [arch=amd64,i386] https://cran.rstudio.com/bin/linux/ubuntu xenial/'
-RUN apt-get update && apt-get install -yq --allow-unauthenticated r-base r-base-dev
+#-------------
+# Install AFNI
+#-------------
+
+RUN apt-get update
+RUN apt-get install -y tcsh xfonts-base python-qt4       \
+                        gsl-bin netpbm gnome-tweak-tool   \
+                        libjpeg62 xvfb xterm vim curl \
+			libglu1-mesa-dev libglw1-mesa     \
+                        libxm4 build-essential
+
+RUN curl -O https://afni.nimh.nih.gov/pub/dist/bin/linux_ubuntu_16_64/@update.afni.binaries
+RUN mkdir /afni
+RUN tcsh @update.afni.binaries -bindir /afni -package linux_ubuntu_16_64  -do_extras
+
+RUN mkdir /afni/R
+RUN echo 'export R_LIBS=/afni/R' >> ~/.bashrc
+ENV PATH "$PATH:/afni"
+ENV PATH "$PATH:/afni/R"
+RUN curl -O https://afni.nimh.nih.gov/pub/dist/src/scripts_src/@add_rcran_ubuntu.tcsh
+RUN tcsh @add_rcran_ubuntu.tcsh
+RUN rPkgsInstall -pkgs ALL
 
 
+# Install python libs
 
 RUN apt-get install -yq --no-install-recommends graphviz
 USER $NB_USER
